@@ -14,7 +14,6 @@ class Empresa(models.Model):
     descripcion = models.TextField(blank=True, null=True)
     status = models.CharField(
         max_length=10,
-        choices=[(tag, tag.value) for tag in EstatusEmpresa],
         default=EstatusEmpresa.ACTIVA.value,
     )
     fecha_creacion = models.DateField(auto_now_add=True)
