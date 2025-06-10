@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Catálogo de Cuentas Contables</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Tipo</th>
+                <th>Padre</th>
+                <th>Descripción</th>
+                <th>Nivel</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cuenta in cuentas %}
+            <tr>
+                <td>{{ cuenta.codigo }}</td>
+                <td>{{ cuenta.nombre }}</td>
+                <td>{{ cuenta.tipo }}</td>
+                <td>
+                    {% if cuenta.padre %}
+                        {{ cuenta.padre.codigo }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>{{ cuenta.descripcion }}</td>
+                <td>{{ cuenta.nivel }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No hay cuentas registradas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

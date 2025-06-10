@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Análisis Vertical</h2>
+<form method="get">
+    <div class="form-group">
+        <label for="periodo">Período:</label>
+        <select name="periodo" id="periodo" class="form-control">
+            {% for p in periodos %}
+            <option value="{{ p.id }}" {% if p.id == periodo_seleccionado %}selected{% endif %}>{{ p.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="tipo">Tipo de Estado:</label>
+        <select name="tipo" id="tipo" class="form-control">
+            <option value="BALANCE" {% if tipo_seleccionado == 'BALANCE' %}selected{% endif %}>Balance General</option>
+            <option value="RESULTADOS" {% if tipo_seleccionado == 'RESULTADOS' %}selected{% endif %}>Estado de Resultados</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Calcular</button>
+</form>
+
+{% if grupos %}
+<div class="mt-4">
+    <h3>Composición Porcentual</h3>
+    {% for tipo, items in grupos.items %}
+    <h4>{{ tipo }}</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Cuenta</th>
+                <th>Valor</th>
+                <th>Porcentaje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.cuenta.nombre }}</td>
+                <td>{{ item.periodo.moneda }} {{ item.periodo.valor|floatformat:2 }}</td>
+                <td>{{ item.porcentaje|floatformat:2 }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endfor %}
+    
+    <div class="chart-container" style="height:400px;">
+        <canvas id="verticalChart"></canvas>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+{% if grupos %}
+    const ctx = document.getElementById('verticalChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [{% for item in resultados %}'{{ item.cuenta.nombre }}',{% endfor %}],
+            datasets: [{
+                label: 'Porcentaje de Composición',
+                data: [{% for item in resultados %}{{ item.porcentaje }},{% endfor %}],
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Porcentaje (%)'
+                    }
+                }
+            }
+        }
+    });
+{% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h2>Agregar Períodos Contables para {{ empresa.nombre }}</h2>
+    <form method="post" id="periodosForm">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        <table class="table" id="periodosTable">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th>Cerrado</th>
+                    <th>Eliminar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in formset %}
+                <tr class="periodo-form">
+                    <td>{{ form.nombre }}</td>
+                    <td>{{ form.fecha_inicio }}</td>
+                    <td>{{ form.fecha_fin }}</td>
+                    <td>{{ form.cerrado }}</td>
+                    <td><button type="button" class="btn btn-danger btn-sm eliminar-fila">X</button></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-secondary" id="agregarPeriodo">Agregar otro período</button>
+        <button type="submit" class="btn btn-success">Guardar Períodos</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/periodos_formset.js' %}"></script>
+{% endblock %}

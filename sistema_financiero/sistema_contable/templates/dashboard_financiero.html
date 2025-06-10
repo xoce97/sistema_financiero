@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Dashboard Financiero</h2>
+    <div class="row g-3">
+        <div class="col-md-6 col-lg-3">
+            <a href="{% url 'periodos_nuevos' empresa_id=request.session.empresa_id %}" class="btn btn-primary w-100 h-100 py-4">
+                <i class="bi bi-calendar-plus"></i><br>
+                Agregar Períodos Contables
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a href="{% url 'nuevo_estado_resultados' %}" class="btn btn-success w-100 h-100 py-4">
+                <i class="bi bi-bar-chart-line"></i><br>
+                Generar Estado de Resultados
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a href="{% url 'nuevo_balance' %}" class="btn btn-info w-100 h-100 py-4">
+                <i class="bi bi-journal"></i><br>
+                Generar Balance General
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a href="{% url 'importar_archivo' %}" class="btn btn-warning w-100 h-100 py-4">
+                <i class="bi bi-upload"></i><br>
+                Importar Archivos
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a href="{% url 'importar_cuentas' %}" class="btn btn-secondary w-100 h-100 py-4">
+                <i class="bi bi-list-columns-reverse"></i><br>
+                Importar Catálogo de Cuentas
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

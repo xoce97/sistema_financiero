@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Análisis Horizontal</h2>
+<form method="get">
+    <div class="form-group">
+        <label for="periodo_base">Período Base:</label>
+        <select name="periodo_base" id="periodo_base" class="form-control">
+            {% for p in periodos %}
+            <option value="{{ p.id }}" {% if p.id == periodo_base_seleccionado %}selected{% endif %}>{{ p.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="periodo_comparacion">Período a Comparar:</label>
+        <select name="periodo_comparacion" id="periodo_comparacion" class="form-control">
+            {% for p in periodos %}
+            <option value="{{ p.id }}" {% if p.id == periodo_comparacion_seleccionado %}selected{% endif %}>{{ p.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="tipo">Tipo de Estado:</label>
+        <select name="tipo" id="tipo" class="form-control">
+            <option value="BALANCE" {% if tipo_seleccionado == 'BALANCE' %}selected{% endif %}>Balance General</option>
+            <option value="RESULTADOS" {% if tipo_seleccionado == 'RESULTADOS' %}selected{% endif %}>Estado de Resultados</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Calcular</button>
+</form>
+
+{% if grupos %}
+<div class="mt-4">
+    <h3>Variaciones entre Períodos</h3>
+    {% for tipo, items in grupos.items %}
+    <h4>{{ tipo }}</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Cuenta</th>
+                <th>Valor Base ({{ items.0.periodo_base.nombre }})</th>
+                <th>Valor Comparación ({{ items.0.periodo_comparacion.nombre }})</th>
+                <th>Variación Absoluta</th>
+                <th>Variación Relativa</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.cuenta.nombre }}</td>
+                <td>{{ item.periodo_base.moneda }} {{ item.get_valor_base|floatformat:2 }}</td>
+                <td>{{ item.periodo_comparacion.moneda }} {{ item.get_valor_comparacion|floatformat:2 }}</td>
+                <td class="{% if item.variacion_absoluta >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {{ item.variacion_absoluta|floatformat:2 }}
+                </td>
+                <td class="{% if item.variacion_relativa >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {{ item.variacion_relativa|floatformat:2 }}%
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endfor %}
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="chart-container" style="height:300px;">
+                <canvas id="absChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container" style="height:300px;">
+                <canvas id="relChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+{% if grupos %}
+    // Gráfico de variación absoluta
+    const absCtx = document.getElementById('absChart').getContext('2d');
+    const absChart = new Chart(absCtx, {
+        type: 'bar',
+        data: {
+            labels: [{% for item in resultados %}'{{ item.cuenta.nombre }}',{% endfor %}],
+            datasets: [{
+                label: 'Variación Absoluta',
+                data: [{% for item in resultados %}{{ item.variacion_absoluta }},{% endfor %}],
+                backgroundColor: function(context) {
+                    return context.raw >= 0 ? 'rgba(75, 192, 192, 0.5)' : 'rgba(255, 99, 132, 0.5)';
+                },
+                borderColor: function(context) {
+                    return context.raw >= 0 ? 'rgba(75, 192, 192, 1)' : 'rgba(255, 99, 132, 1)';
+                },
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.raw.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Gráfico de variación relativa
+    const relCtx = document.getElementById('relChart').getContext('2d');
+    const relChart = new Chart(relCtx, {
+        type: 'bar',
+        data: {
+            labels: [{% for item in resultados %}'{{ item.cuenta.nombre }}',{% endfor %}],
+            datasets: [{
+                label: 'Variación Relativa (%)',
+                data: [{% for item in resultados %}{{ item.variacion_relativa }},{% endfor %}],
+                backgroundColor: function(context) {
+                    return context.raw >= 0 ? 'rgba(75, 192, 192, 0.5)' : 'rgba(255, 99, 132, 0.5)';
+                },
+                borderColor: function(context) {
+                    return context.raw >= 0 ? 'rgba(75, 192, 192, 1)' : 'rgba(255, 99, 132, 1)';
+                },
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.raw.toFixed(2) + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+{% endif %}
+</script>
+{% endblock %}
